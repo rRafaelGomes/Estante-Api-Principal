@@ -1,0 +1,29 @@
+# Este docker-compose sobe as DUAS APIs para facilitar o teste local.
+# Ele assume que o repositório da API Secundária foi clonado na pasta
+# irmã "../estante-api-secundaria" (ou seja, os dois repositórios
+# clonados lado a lado na mesma pasta pai). Ajuste o caminho do "build"
+# abaixo caso tenha clonado em outro lugar.
+services:
+  api-secundaria:
+    build: ../estante-api-secundaria
+    container_name: estante-api-secundaria
+    ports:
+      - "8001:8001"
+    volumes:
+      - estante-db:/app/data
+    environment:
+      - DB_PATH=/app/data/estante.db
+
+  api-principal:
+    build: .
+    container_name: estante-api-principal
+    ports:
+      - "8000:8000"
+    environment:
+      - API_SECUNDARIA_URL=http://api-secundaria:8001
+      - GOOGLE_BOOKS_API_KEY=${GOOGLE_BOOKS_API_KEY}
+    depends_on:
+      - api-secundaria
+
+volumes:
+  estante-db:
